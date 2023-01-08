@@ -7,5 +7,5 @@ VALUES (111,"firstdepo"),
         (112, "anotherDepo");
 
 INSERT INTO role (id, title, salary, department_id)
-value (311, 100.000, 6);
+value (311, "Sales Lead", 100.000, 6);
        
