@@ -8,7 +8,7 @@ CREATE TABLE employee (
   first_name VARCHAR(30),
   last_name VARCHAR(30),
   manager_id INT,
-  role_id INT  
+  role_id INT 
 );
 
 CREATE TABLE department (
