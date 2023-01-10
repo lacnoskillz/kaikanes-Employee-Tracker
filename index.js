@@ -35,6 +35,33 @@ choices: ['Bob',"Erik"],
 }
 ];
 
+const departmentquestions = [
+{
+  type: 'input',
+  message: "what is the name of the department?",
+  name: 'departname',
+}
+];
+
+const rolesquestions = [
+  {
+    type: 'input',
+    message: "what is the name of the role?",
+    name: 'rolename',
+  },
+  {
+    type: 'input',
+    message: "what is the salary of the role?",
+    name: 'rolesalary',
+  },
+  {
+    type: 'list',
+    message: "which department does the role belong to?",
+    name: 'roledepart',
+    choices: []
+  }
+
+  ];
 const db = mysql.createConnection(
   {
     host: 'localhost',
@@ -65,12 +92,12 @@ inquirer
       .prompt(employeequestion)
       .then((data)=>{
         console.log(data);
-        db.query('INSERT INTO employee (id, first_name, last_name, manager_id, role_id) VALUES ( ${data.employeeFN}, ${data.employeeLN}, 123, 44);',(err, results) => {
-          console.table(results);
+        db.query(`INSERT INTO employee (first_name, last_name, manager_id, role_id) VALUES ( ${data.employeeFN}, ${data.employeeLN}, 125, 54);`,(err, results) => {
+          console.log(results);
         });
         init(questions);
       })
-     // init(questions);
+     
     }
     if(data.whatdo == "Update Employee Role"){
       console.log("Update role workig");
@@ -86,11 +113,25 @@ inquirer
     }
     if(data.whatdo == "View All Departments"){
       console.log("view departments");
-      init(questions);
+      db.query(`SELECT * FROM department`, (err, result) => {
+        if (err) {
+          console.log(err);
+        }
+        console.table(result);
+        init(questions);
+      });
     }
     if(data.whatdo == "Add Department"){
       console.log("add department");
-      init(questions);
+      inquirer
+      .prompt(departmentquestions)
+      .then((data)=>{
+        console.log(data);
+        db.query(`INSERT INTO department (name) VALUES ( ${data.departname});`,(err, results) => {
+          console.log(results);
+        });
+        init(questions);
+      })
     }
     if(data.whatdo == "Quit"){
       console.log("exit program");
