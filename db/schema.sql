@@ -7,6 +7,9 @@ CREATE TABLE employee (
   id INT PRIMARY KEY AUTO_INCREMENT,
   first_name VARCHAR(30),
   last_name VARCHAR(30),
+  title VARCHAR(30),
+  department VARCHAR(30),
+  salary DECIMAL,
   manager_id INT,
   role_id INT 
 );

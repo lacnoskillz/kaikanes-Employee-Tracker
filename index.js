@@ -2,7 +2,7 @@ const inquirer = require('inquirer');
 const fs = require('fs');
 const mysql = require('mysql2');
 const cTable = require('console.table');
-
+const departments = []
 const questions = [{
   type: 'list',
   message: "what do you want to do?",
@@ -31,7 +31,7 @@ const employeequestion = [
 type: 'list',
 message: 'Who is the employees manager? ',
 name: 'employeeManager',
-choices: ['Bob',"Erik"],
+choices: ['none','Bob',"Erik"],
 }
 ];
 
