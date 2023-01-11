@@ -2,7 +2,8 @@ const inquirer = require('inquirer');
 const fs = require('fs');
 const mysql = require('mysql2');
 const cTable = require('console.table');
-const departments = []
+let departments = ["Sales Department", "Engineer Department", "Accounting Department","Customer Service Department","Legal Department"];
+let roles = ['Sales Lead', 'Salesperson', 'Lead Engineer', 'Software Engineer', 'Account Manager', 'Accountant', 'Legal Team Lead', 'Lawyer', 'Customer Service'];
 const questions = [{
   type: 'list',
   message: "what do you want to do?",
@@ -24,7 +25,7 @@ const employeequestion = [
   type: 'list',
   message: 'What is the employees role?',
   name: 'employeeRole',
-  choices: ['Sales Lead', 'Salesperson', 'Lead Engineer', 'Software Engineer', 'Account Manager', 'Accountant', 'Legal Team Lead', 'Lawyer', 'Customer Service'],
+  choices: roles,
   
 },
 {
@@ -58,7 +59,7 @@ const rolesquestions = [
     type: 'list',
     message: "which department does the role belong to?",
     name: 'roledepart',
-    choices: []
+    choices: departments
   }
 
   ];
@@ -77,7 +78,6 @@ inquirer
   .prompt(questions)
   .then((data) => {
     if(data.whatdo == "View all employees"){
-      console.log("view employee ifstatement working");
       db.query(`SELECT * FROM employee`, (err, result) => {
         if (err) {
           console.log(err);
@@ -92,27 +92,42 @@ inquirer
       .prompt(employeequestion)
       .then((data)=>{
         console.log(data);
-        db.query(`INSERT INTO employee (first_name, last_name, manager_id, role_id) VALUES ( ${data.employeeFN}, ${data.employeeLN}, 125, 54);`,(err, results) => {
-          console.log(results);
+        console.log(data.employeeFN);
+        db.query(`INSERT INTO employee (first_name, last_name, tittle, department, salary, manager) VALUES ( "${data.employeeFN}", "${data.employeeLN}", "${data.employeeRole}","${data.employeedepo}", "${data.sal}", "${data.employeeManager}");`,(err, results) => {
+          console.table(results);
         });
         init(questions);
       })
      
     }
     if(data.whatdo == "Update Employee Role"){
-      console.log("Update role workig");
       init(questions);
     }
     if(data.whatdo == "View all roles"){
-      console.log("view roles working");
-      init(questions);
+         db.query(`SELECT * FROM role`, (err, result) => {
+        if (err) {
+          console.log(err);
+        }
+        console.table(result);
+        init(questions);
+      });
     }
     if(data.whatdo == "Add role"){
-      console.log("add roll");
-      init(questions);
+      inquirer
+      .prompt(rolesquestions)
+      .then((data)=>{
+        console.log(data);
+        console.log(data.employeeFN);
+        roles = roles.push(data.rolename);
+        console.log(roles);
+        db.query(`INSERT INTO role (title, salary) VALUES ( "${data.rolename}", "${data.rolesalary}");`,(err, results) => {
+          console.table(results);
+          init(questions);
+        });
+      }) 
+     
     }
     if(data.whatdo == "View All Departments"){
-      console.log("view departments");
       db.query(`SELECT * FROM department`, (err, result) => {
         if (err) {
           console.log(err);
@@ -122,15 +137,17 @@ inquirer
       });
     }
     if(data.whatdo == "Add Department"){
-      console.log("add department");
       inquirer
       .prompt(departmentquestions)
       .then((data)=>{
         console.log(data);
-        db.query(`INSERT INTO department (name) VALUES ( ${data.departname});`,(err, results) => {
-          console.log(results);
+        console.log(data.departname);
+        departments = departments.push(data.departname);
+        console.log(departments);
+        db.query(`INSERT INTO department (dep_name) VALUES ( "${data.departname}");`,(err, results) => {
+          console.table(results);
+          init(questions);
         });
-        init(questions);
       })
     }
     if(data.whatdo == "Quit"){
@@ -138,14 +155,14 @@ inquirer
       return;
       
     }
-  //do something with data
+  
   console.log(data);
   })
   .catch((error) => {
     if (error.isTtyError) {
-      // Prompt couldn't be rendered in the current environment
+      
     } else {
-      // Something else went wrong
+      
     }
   });
 }

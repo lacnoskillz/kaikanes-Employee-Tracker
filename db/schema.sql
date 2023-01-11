@@ -16,7 +16,7 @@ CREATE TABLE employee (
 
 CREATE TABLE department (
   id INT PRIMARY KEY AUTO_INCREMENT,
-  name VARCHAR(30)
+  dep_name VARCHAR(30)
 );
 
 CREATE TABLE role (

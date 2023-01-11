@@ -17,5 +17,5 @@ for users to view and manage the departments, roles, and employees in a company.
 ![image](./assets/images/Screenshot%20(93).png)
 #### Link
 ***
-click for walk through Video
+click for walk through video
 [click me]()
