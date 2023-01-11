@@ -4,12 +4,35 @@ const mysql = require('mysql2');
 const cTable = require('console.table');
 let departments = ["Sales Department", "Engineer Department", "Accounting Department","Customer Service Department","Legal Department"];
 let roles = ['Sales Lead', 'Salesperson', 'Lead Engineer', 'Software Engineer', 'Account Manager', 'Accountant', 'Legal Team Lead', 'Lawyer', 'Customer Service'];
+let managerChoices = ["none"];
 const questions = [{
   type: 'list',
   message: "what do you want to do?",
   name: 'whatdo',
   choices: ['View all employees', 'ADD Employee', 'Update Employee Role', 'View all roles', 'Add role', 'View All Departments','Add Department','Quit']
 }];
+const db = mysql.createConnection(
+  {
+    host: 'localhost',
+    user: 'root',
+    password: 'hV0*Ly/K2NbG',
+    database: 'employee_db'
+  },
+  console.log(`Connected to the employee_db database.`)
+);
+//  let managers = db.query(`SELECT * FROM employee`, (err, result) => {
+//   if (err) {
+//     console.log(err);
+//   }
+//   console.table(result);
+//   init(questions);
+// });
+
+//  console.log(managers);
+//  let managerChoices = managers.map(({id,first_name,last_name}) => ({
+//   name: `${first_name} ${last_name}`,
+//   value: id
+//  })); 
 const employeequestion = [
   {
   type: 'input',
@@ -32,9 +55,9 @@ const employeequestion = [
 type: 'list',
 message: 'Who is the employees manager? ',
 name: 'employeeManager',
-choices: ['none','Bob',"Erik"],
-}
-];
+choices: managerChoices
+
+}];
 
 const departmentquestions = [
 {
@@ -63,15 +86,7 @@ const rolesquestions = [
   }
 
   ];
-const db = mysql.createConnection(
-  {
-    host: 'localhost',
-    user: 'root',
-    password: 'hV0*Ly/K2NbG',
-    database: 'employee_db'
-  },
-  console.log(`Connected to the employee_db database.`)
-);
+
 
 function init(questions){
 inquirer
@@ -85,7 +100,6 @@ inquirer
         console.table(result);
         init(questions);
       });
-     
     }
     if(data.whatdo == "ADD Employee"){
       inquirer
@@ -93,10 +107,15 @@ inquirer
       .then((data)=>{
         console.log(data);
         console.log(data.employeeFN);
-        db.query(`INSERT INTO employee (first_name, last_name, tittle, department, salary, manager) VALUES ( "${data.employeeFN}", "${data.employeeLN}", "${data.employeeRole}","${data.employeedepo}", "${data.sal}", "${data.employeeManager}");`,(err, results) => {
+        let salary = db.query(`SELECT salary FROM role WHERE title="${data.employeeRole}"`);
+        let departmentID = db.query(`SELECT department_id FROM role WHERE title="${data.employeeRole}"`);
+        //console.log(departmentID);
+        
+        db.query(`INSERT INTO employee (first_name, last_name, tittle, department, salary, manager) VALUES ( "${data.employeeFN}", "${data.employeeLN}", "${data.employeeRole}","${departmentID}", "${data.employeeManager}"), "${salary}";`,(err, results) => {
           console.table(results);
+          init(questions);
         });
-        init(questions);
+        
       })
      
     }
