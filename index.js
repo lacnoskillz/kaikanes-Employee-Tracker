@@ -169,8 +169,6 @@ function init(questions) {
           if (err) {
             console.log(err);
           }
-          console.log(result);
-          console.log(result.department_id);
           console.table(result);
           init(initialquestions);
         });
@@ -180,8 +178,19 @@ function init(questions) {
           .prompt(rolesquestions)
           .then((data) => {
             roles.push(data.rolename);
+            // let departid;
+            // console.log(data.roledepart,"roledepart");
+          //   db.query(`SELECT id FROM department WHERE dep_name="${data.roledepart}"`,(err,results) => {
+          //    console.log(results,"results");
+          //    str = JSON.stringify(results);
+          //   let newstr = str.match(/\d/g);
+          //   newstr = newstr.join("");
+          //  console.log(newstr,"final");
+          //  departid = newstr;
+          //   });
+          
             db.query(`INSERT INTO role (title, salary) VALUES ( "${data.rolename}", "${data.rolesalary}");`, (err, results) => {
-              console.table(results);
+              
               init(initialquestions);
             });
           })
@@ -223,3 +232,8 @@ function init(questions) {
     });
 }
 init(initialquestions);
+// if(data.employeeManager == "none"){
+//   data.employeeFN
+//   data.employeeLN
+//   managerChoices.push()
+//}
