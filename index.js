@@ -178,23 +178,27 @@ function init(questions) {
           .prompt(rolesquestions)
           .then((data) => {
             roles.push(data.rolename);
-            // let departid;
-            // console.log(data.roledepart,"roledepart");
-          //   db.query(`SELECT id FROM department WHERE dep_name="${data.roledepart}"`,(err,results) => {
-          //    console.log(results,"results");
-          //    str = JSON.stringify(results);
-          //   let newstr = str.match(/\d/g);
-          //   newstr = newstr.join("");
-          //  console.log(newstr,"final");
-          //  departid = newstr;
-          //   });
-          
-            db.query(`INSERT INTO role (title, salary) VALUES ( "${data.rolename}", "${data.rolesalary}");`, (err, results) => {
-              
+            let departid;
+             departid = data.roledepart;
+             db.query(`SELECT id FROM department WHERE dep_name="${departid}"`,(err,results) => {
+              console.log(results,"results");
+              str = JSON.stringify(results);
+             let newstr = str.match(/\d/g);
+             newstr = newstr.join("");
+            console.log(newstr,"final");
+            departid = parseInt(newstr);
+            console.log(departid);
+            InsertRole(departid);
+             });
+            function InsertRole(departid){
+            console.log(data.roledepart,"roledepart");
+            db.query(`INSERT INTO role (title, salary, department_id) VALUES ( "${data.rolename}", "${data.rolesalary}", "${departid}");`, (err, results) => {
+              console.table(results);
               init(initialquestions);
             });
+          }
           })
-
+        
       }
       if (data.whatdo == "View All Departments") {
         db.query(`SELECT * FROM department`, (err, result) => {
@@ -232,6 +236,7 @@ function init(questions) {
     });
 }
 init(initialquestions);
+
 // if(data.employeeManager == "none"){
 //   data.employeeFN
 //   data.employeeLN
