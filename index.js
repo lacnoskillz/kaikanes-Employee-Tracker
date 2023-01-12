@@ -2,7 +2,7 @@ const inquirer = require('inquirer');
 const fs = require('fs');
 const mysql = require('mysql2');
 const cTable = require('console.table');
-let departments = ["Sales Department", "Engineer Department", "Accounting Department","Customer Service Department","Legal Department"];
+let departments = ['Sales Department', 'Engineer Department', 'Accounting Department','Customer Service Department','Legal Department'];
 let roles = ['Sales Lead', 'Salesperson', 'Lead Engineer', 'Software Engineer', 'Account Manager', 'Accountant', 'Legal Team Lead', 'Lawyer', 'Customer Service'];
 let managerChoices = ["none"];
 const questions = [{
@@ -20,6 +20,18 @@ const db = mysql.createConnection(
   },
   console.log(`Connected to the employee_db database.`)
 );
+let employees = [];
+let employees1 = db.query(`SELECT first_name, last_name FROM employee`, (err, result) => {
+  if (err) {
+    console.log(err);
+  }
+  console.log(result,"rsults");
+  console.table(result);
+  //init(questions);
+});
+employees.push(employees1);
+console.log(employees,"emp after dbquery");
+
 //  let managers = db.query(`SELECT * FROM employee`, (err, result) => {
 //   if (err) {
 //     console.log(err);
@@ -86,6 +98,14 @@ const rolesquestions = [
   }
 
   ];
+  const updatequestion = [
+    {
+      type: 'list',
+      message: "which employees role do you want to update?",
+      name: 'employeeupdate',
+      choices: employees
+    },
+  ]
 
 
 function init(questions){
@@ -120,6 +140,7 @@ inquirer
      
     }
     if(data.whatdo == "Update Employee Role"){
+
       init(questions);
     }
     if(data.whatdo == "View all roles"){
@@ -137,7 +158,7 @@ inquirer
       .then((data)=>{
         console.log(data);
         console.log(data.employeeFN);
-        roles = roles.push(data.rolename);
+        roles.push(data.rolename);
         console.log(roles);
         db.query(`INSERT INTO role (title, salary) VALUES ( "${data.rolename}", "${data.rolesalary}");`,(err, results) => {
           console.table(results);
@@ -161,7 +182,8 @@ inquirer
       .then((data)=>{
         console.log(data);
         console.log(data.departname);
-        departments = departments.push(data.departname);
+        console.log(departments,"departments");
+        departments.push(data.departname);
         console.log(departments);
         db.query(`INSERT INTO department (dep_name) VALUES ( "${data.departname}");`,(err, results) => {
           console.table(results);
