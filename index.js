@@ -169,6 +169,8 @@ function init(questions) {
           if (err) {
             console.log(err);
           }
+          console.log(result);
+          console.log(result.department_id);
           console.table(result);
           init(initialquestions);
         });
