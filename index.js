@@ -5,6 +5,8 @@ const cTable = require('console.table');
 let departments = ['Sales Department', 'Engineer Department', 'Accounting Department', 'Customer Service Department', 'Legal Department'];
 let roles = ['Sales Lead', 'Salesperson', 'Lead Engineer', 'Software Engineer', 'Account Manager', 'Accountant', 'Legal Team Lead', 'Lawyer', 'Customer Service'];
 let managerChoices = ["none"];
+
+
 const initialquestions = [{
   type: 'list',
   message: "what do you want to do?",
@@ -23,22 +25,22 @@ const db = mysql.createConnection(
 let employees = [];
 let employeesfinal = [];
 //goes through all first and last names and converts it to an array so it can be used in inquirer
-function namelist(){
-db.query(`SELECT first_name, last_name FROM employee`, (err, result) => {
-  if (err) {
-    console.log(err);
-  }
-  employees = result;
+function namelist() {
+  db.query(`SELECT first_name, last_name FROM employee`, (err, result) => {
+    if (err) {
+      console.log(err);
+    }
+    employees = result;
 
-  for (var i = 0; i < employees.length; i++) {
-    let propertyValues = Object.values(employees[i]);
-    let empstring = propertyValues.toString("");
-    empstring = empstring.replaceAll(',', ' ');
-    employeesfinal.push(empstring);
-  }
-  ;
-return employeesfinal;
-});
+    for (var i = 0; i < employees.length; i++) {
+      let propertyValues = Object.values(employees[i]);
+      let empstring = propertyValues.toString("");
+      empstring = empstring.replaceAll(',', ' ');
+      employeesfinal.push(empstring);
+    }
+    ;
+    return employeesfinal;
+  });
 
 }
 namelist();
@@ -113,7 +115,13 @@ const updatequestion = [
     type: 'list',
     message: "which employees role do you want to update?",
     name: 'employeeupdate',
-    choices: employeesfinal
+    choices: employeesfinal,
+  },
+  {
+    type: 'list',
+    message: "which role do you want to assign the selected employee?",
+    name: 'employeeupdaterole',
+    choices: roles
   },
 ]
 
@@ -137,32 +145,91 @@ function init(questions) {
           .then((data) => {
             console.log(data);
             console.log(data.employeeFN);
-            let salary = db.query(`SELECT salary FROM role WHERE title="${data.employeeRole}"`);
-            let departmentID = db.query(`SELECT department_id FROM role WHERE title="${data.employeeRole}"`);
-            //console.log(departmentID);
+            console.log(data.employeeRole);
+            let salary = 0;
+            db.query(`SELECT salary FROM role WHERE title="${data.employeeRole}"`, (err, result) => {
+              if (err) {
+                console.log(err);
+              }
 
-            db.query(`INSERT INTO employee (first_name, last_name, tittle, department, salary, manager) VALUES ( "${data.employeeFN}", "${data.employeeLN}", "${data.employeeRole}","${departmentID}", "${data.employeeManager}"), "${salary}";`, (err, results) => {
-              console.table(results);
-              namelist();
-              init(initialquestions);
+              console.log(salary, "salary");
+              let str = JSON.stringify(result);
+              let newstr = str.match(/\d/g);
+              newstr = newstr.join("");
+              salary = parseInt(newstr);
+              console.log(salary, "salary");
+              departmetnIDfunction();
+            });
+            function departmetnIDfunction() {
+              db.query(`SELECT department_id FROM role WHERE title="${data.employeeRole}"`, (err, result) => {
+                if (err) {
+                  console.log(err);
+                }
+                let depID = 0;
+                depID = result;
+                console.log(depID, "depID");
+                let str = JSON.stringify(depID);
+                let newstr = str.match(/\d/g);
+                newstr = newstr.join("");
+                depID = parseInt(newstr);
+                console.log(depID, "depID");
+                getdepartmentname(depID);
+              });
+            }
+            function getdepartmentname(depID) {
+              db.query(`SELECT dep_name FROM department WHERE id="${depID}"`, (err, result) => {
+                let depname = result;
+                console.log(depname, "depname");
+                let propertyValues = [];
+                propertyValues = Object.values(depname[0]);
+
+                console.log(propertyValues[0]);
+                Insertemployee(propertyValues[0]);
+              })
+            }
+            function Insertemployee(departname) {
+             console.log(data.employeeFN,"FN");
+             if(data.employeeManager == "none"){
+              let anewmanager = data.employeeFN + " "+ data.employeeLN;
+              console.log(anewmanager,"adding");
+              managerChoices.push(anewmanager);
+              console.log(managerChoices,"managerschoices");
+             }
+             
+              db.query(`INSERT INTO employee (first_name, last_name, title, department, salary, Managername) VALUES ("${data.employeeFN}","${data.employeeLN}", "${data.employeeRole}", "${departname}", ${salary}, "${data.employeeManager}");`, (err, results) => {
+                console.table(results);
+                //starts the inititalquestions prompt again
+                //runs function namelist to update with added employee
+                namelist();
+                init(initialquestions);
+              });
+            }
+         
+          });
+      }
+      if (data.whatdo == "Update Employee Role") {
+
+        inquirer
+          .prompt(updatequestion)
+          .then((data) => {
+            console.log(data);
+            console.log(data.employeeupdate,"name?");
+            let str = data.employeeupdate;
+            console.log(str,"str");
+           const arry = str.split(' ');
+           console.log(arry,"arry");
+            let FN = arry[0];
+            let LN = arry[1];
+            console.log(FN);
+            console.log(LN);
+            //AND last_name="${LN}"
+            db.query(`UPDATE employee SET title=${data.employeeupdaterole} WHERE first_name ="${FN}"`, (err, results) => {
+              
+              init(questions);
             });
 
           })
 
-      }
-      if (data.whatdo == "Update Employee Role") {
-        
-        inquirer
-        .prompt(updatequestion)
-        .then((data) => {
-          //console.log(data);
-          // db.query(`UPDATE employee SET `, (err, results) => {
-          //   console.table(results);
-          // //   init(questions);
-          // });
-
-        })
-        
       }
       if (data.whatdo == "View all roles") {
         db.query(`SELECT * FROM role`, (err, result) => {
@@ -177,28 +244,35 @@ function init(questions) {
         inquirer
           .prompt(rolesquestions)
           .then((data) => {
+            //adds the role name user enters into the array roles
             roles.push(data.rolename);
+            //let departid == to the department user input
             let departid;
-             departid = data.roledepart;
-             db.query(`SELECT id FROM department WHERE dep_name="${departid}"`,(err,results) => {
-              console.log(results,"results");
+            departid = data.roledepart;
+            //selects the id from the department the user input and converts the object to string then string to just the number then that string number to integer
+            db.query(`SELECT id FROM department WHERE dep_name="${departid}"`, (err, results) => {
+              console.log(results, "results");
               str = JSON.stringify(results);
-             let newstr = str.match(/\d/g);
-             newstr = newstr.join("");
-            console.log(newstr,"final");
-            departid = parseInt(newstr);
-            console.log(departid);
-            InsertRole(departid);
-             });
-            function InsertRole(departid){
-            console.log(data.roledepart,"roledepart");
-            db.query(`INSERT INTO role (title, salary, department_id) VALUES ( "${data.rolename}", "${data.rolesalary}", "${departid}");`, (err, results) => {
-              console.table(results);
-              init(initialquestions);
+              let newstr = str.match(/\d/g);
+              newstr = newstr.join("");
+              console.log(newstr, "final");
+              departid = parseInt(newstr);
+              console.log(departid);
+
+              //sends the number extracted to the function InsertRole
+              InsertRole(departid);
             });
-          }
+            //inserts new rolename/salary of that role and department id
+            function InsertRole(departid) {
+              console.log(data.roledepart, "roledepart");
+              db.query(`INSERT INTO role (title, salary, department_id) VALUES ( "${data.rolename}", "${data.rolesalary}", "${departid}");`, (err, results) => {
+                console.table(results);
+                //starts the inititalquestions prompt again
+                init(initialquestions);
+              });
+            }
           })
-        
+
       }
       if (data.whatdo == "View All Departments") {
         db.query(`SELECT * FROM department`, (err, result) => {
@@ -222,7 +296,7 @@ function init(questions) {
       }
       if (data.whatdo == "Quit") {
         console.log("exit program");
-        
+
 
       }
 
@@ -235,6 +309,7 @@ function init(questions) {
       }
     });
 }
+
 init(initialquestions);
 
 // if(data.employeeManager == "none"){
