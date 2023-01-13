@@ -18,4 +18,4 @@ for users to view and manage the departments, roles, and employees in a company.
 #### Link
 ***
 click for walk through video
-[click me]()
+[click me](https://drive.google.com/file/d/1QUPRzN6fG6UaGNHN0dwlHtdng3RxTRUx/view)
