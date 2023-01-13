@@ -131,7 +131,7 @@ function init(questions) {
     .prompt(questions)
     .then((data) => {
       if (data.whatdo == "View all employees") {
-        db.query(`SELECT * FROM employee`, (err, result) => {
+        db.query(`SELECT id, first_name, last_name, title, department, salary, Managername FROM employee`, (err, result) => {
           if (err) {
             console.log(err);
           }
@@ -222,12 +222,29 @@ function init(questions) {
             let LN = arry[1];
             console.log(FN);
             console.log(LN);
-            //AND last_name="${LN}"
-            db.query(`UPDATE employee SET title=${data.employeeupdaterole} WHERE first_name ="${FN}"`, (err, results) => {
+            getemployeeid(FN,LN);
+            function getemployeeid(FN,LN){
+              db.query(`SELECT id FROM employee WHERE first_name="${FN}" AND last_name="${LN}"`, (err, result) => {
+                if (err) {
+                  console.log(err);
+                }
+             
+             let propertyValues = [];
+             propertyValues = Object.values(result[0]);
+             console.log(propertyValues[0],"prop");
+             let id = propertyValues[0];
+                 lastoneID(id);
+              });
+            
+
+            }
+            function lastoneID(id){
+              console.log(data.employeeupdaterole,"empup");
+            db.query(`UPDATE employee SET title="${data.employeeupdaterole}" WHERE id ="${id}"`, (err, results) => {
               
               init(questions);
             });
-
+          }
           })
 
       }
