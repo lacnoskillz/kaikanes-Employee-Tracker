@@ -14,12 +14,14 @@ const initialquestions = [{
   name: 'whatdo',
   choices: ['View all employees', 'ADD Employee', 'Update Employee Role', 'View all roles', 'Add role', 'View All Departments', 'Add Department', 'Quit']
 }];
-//declare connection with my info...dont steal my password!!!
+//declare connection using your info
 const db = mysql.createConnection(
   {
     host: 'localhost',
+    //youu sername
     user: 'root',
-    password: 'hV0*Ly/K2NbG',
+    //your password
+    password: '',
     database: 'employee_db'
   },
   console.log(`Connected to the employee_db database.`)
