@@ -1,3 +1,4 @@
+//declare variables and call packages
 const inquirer = require('inquirer');
 const fs = require('fs');
 const mysql = require('mysql2');
@@ -6,13 +7,14 @@ let departments = ['Sales Department', 'Engineer Department', 'Accounting Depart
 let roles = ['Sales Lead', 'Salesperson', 'Lead Engineer', 'Software Engineer', 'Account Manager', 'Accountant', 'Legal Team Lead', 'Lawyer', 'Customer Service'];
 let managerChoices = ["none"];
 
-
+//first array of questions that gets asked and will get asked again after next set is done
 const initialquestions = [{
   type: 'list',
   message: "what do you want to do?",
   name: 'whatdo',
   choices: ['View all employees', 'ADD Employee', 'Update Employee Role', 'View all roles', 'Add role', 'View All Departments', 'Add Department', 'Quit']
 }];
+//declare connection with my info...dont steal my password!!!
 const db = mysql.createConnection(
   {
     host: 'localhost',
@@ -22,6 +24,7 @@ const db = mysql.createConnection(
   },
   console.log(`Connected to the employee_db database.`)
 );
+//make two more empty arrays that will update if user makes  another employee
 let employees = [];
 let employeesfinal = [];
 //goes through all first and last names and converts it to an array so it can be used in inquirer
@@ -43,20 +46,9 @@ function namelist() {
   });
 
 }
+//calls the function to update name list
 namelist();
-//  let managers = db.query(`SELECT * FROM employee`, (err, result) => {
-//   if (err) {
-//     console.log(err);
-//   }
-//   console.table(result);
-//   init(questions);
-// });
-
-//  console.log(managers);
-//  let managerChoices = managers.map(({id,first_name,last_name}) => ({
-//   name: `${first_name} ${last_name}`,
-//   value: id
-//  })); 
+//questions asked if user wants to add another employee
 const employeequestion = [
   {
     type: 'input',
@@ -82,7 +74,7 @@ const employeequestion = [
     choices: managerChoices
 
   }];
-
+//question asked if user wants to make another department
 const departmentquestions = [
   {
     type: 'input',
@@ -90,7 +82,7 @@ const departmentquestions = [
     name: 'departname',
   }
 ];
-
+//questions asked if user wants to make another role
 const rolesquestions = [
   {
     type: 'input',
@@ -110,6 +102,7 @@ const rolesquestions = [
   }
 
 ];
+//questione asked if user wants to update a role
 const updatequestion = [
   {
     type: 'list',
@@ -125,11 +118,12 @@ const updatequestion = [
   },
 ]
 
-
+//function that runs on start asking the first array of questions "initialquestions"
 function init(questions) {
   inquirer
     .prompt(questions)
     .then((data) => {
+      //if user want to view all employeess show all employeess in table
       if (data.whatdo == "View all employees") {
         db.query(`SELECT id, first_name, last_name, title, department, salary, Managername FROM employee`, (err, result) => {
           if (err) {
@@ -139,6 +133,7 @@ function init(questions) {
           init(initialquestions);
         });
       }
+      //if user wants to add an employee prompts them with employee questions uses data to eventually INSERT query
       if (data.whatdo == "ADD Employee") {
         inquirer
           .prompt(employeequestion)
@@ -188,14 +183,14 @@ function init(questions) {
               })
             }
             function Insertemployee(departname) {
-             console.log(data.employeeFN,"FN");
-             if(data.employeeManager == "none"){
-              let anewmanager = data.employeeFN + " "+ data.employeeLN;
-              console.log(anewmanager,"adding");
-              managerChoices.push(anewmanager);
-              console.log(managerChoices,"managerschoices");
-             }
-             
+              console.log(data.employeeFN, "FN");
+              if (data.employeeManager == "none") {
+                let anewmanager = data.employeeFN + " " + data.employeeLN;
+                console.log(anewmanager, "adding");
+                managerChoices.push(anewmanager);
+                console.log(managerChoices, "managerschoices");
+              }
+
               db.query(`INSERT INTO employee (first_name, last_name, title, department, salary, Managername) VALUES ("${data.employeeFN}","${data.employeeLN}", "${data.employeeRole}", "${departname}", ${salary}, "${data.employeeManager}");`, (err, results) => {
                 console.table(results);
                 //starts the inititalquestions prompt again
@@ -204,50 +199,52 @@ function init(questions) {
                 init(initialquestions);
               });
             }
-         
+
           });
       }
+      //if user wants to update a role it will prompt the update role questions then use that data to eventuall update query
       if (data.whatdo == "Update Employee Role") {
 
         inquirer
           .prompt(updatequestion)
           .then((data) => {
             console.log(data);
-            console.log(data.employeeupdate,"name?");
+            console.log(data.employeeupdate, "name?");
             let str = data.employeeupdate;
-            console.log(str,"str");
-           const arry = str.split(' ');
-           console.log(arry,"arry");
+            console.log(str, "str");
+            const arry = str.split(' ');
+            console.log(arry, "arry");
             let FN = arry[0];
             let LN = arry[1];
             console.log(FN);
             console.log(LN);
-            getemployeeid(FN,LN);
-            function getemployeeid(FN,LN){
+            getemployeeid(FN, LN);
+            function getemployeeid(FN, LN) {
               db.query(`SELECT id FROM employee WHERE first_name="${FN}" AND last_name="${LN}"`, (err, result) => {
                 if (err) {
                   console.log(err);
                 }
-             
-             let propertyValues = [];
-             propertyValues = Object.values(result[0]);
-             console.log(propertyValues[0],"prop");
-             let id = propertyValues[0];
-                 lastoneID(id);
+
+                let propertyValues = [];
+                propertyValues = Object.values(result[0]);
+                console.log(propertyValues[0], "prop");
+                let id = propertyValues[0];
+                lastoneID(id);
               });
-            
+
 
             }
-            function lastoneID(id){
-              console.log(data.employeeupdaterole,"empup");
-            db.query(`UPDATE employee SET title="${data.employeeupdaterole}" WHERE id ="${id}"`, (err, results) => {
-              
-              init(questions);
-            });
-          }
+            function lastoneID(id) {
+              console.log(data.employeeupdaterole, "empup");
+              db.query(`UPDATE employee SET title="${data.employeeupdaterole}" WHERE id ="${id}"`, (err, results) => {
+
+                init(questions);
+              });
+            }
           })
 
       }
+      //shows user all roles in database using table package
       if (data.whatdo == "View all roles") {
         db.query(`SELECT * FROM role`, (err, result) => {
           if (err) {
@@ -257,6 +254,7 @@ function init(questions) {
           init(initialquestions);
         });
       }
+      //if user wants to add a role prompts them with rolesquestions then eventually inserts it with a query
       if (data.whatdo == "Add role") {
         inquirer
           .prompt(rolesquestions)
@@ -291,6 +289,7 @@ function init(questions) {
           })
 
       }
+      //if user wants to view departments it will show the them using the table package
       if (data.whatdo == "View All Departments") {
         db.query(`SELECT * FROM department`, (err, result) => {
           if (err) {
@@ -300,6 +299,7 @@ function init(questions) {
           init(initialquestions);
         });
       }
+      //if user wants to add department prompts user with departmentquestions then uses data to insert into database
       if (data.whatdo == "Add Department") {
         inquirer
           .prompt(departmentquestions)
@@ -311,6 +311,7 @@ function init(questions) {
             });
           })
       }
+      //exits program
       if (data.whatdo == "Quit") {
         console.log("exit program");
 
@@ -329,8 +330,3 @@ function init(questions) {
 
 init(initialquestions);
 
-// if(data.employeeManager == "none"){
-//   data.employeeFN
-//   data.employeeLN
-//   managerChoices.push()
-//}
