@@ -3,6 +3,7 @@ const inquirer = require('inquirer');
 const fs = require('fs');
 const mysql = require('mysql2');
 const cTable = require('console.table');
+//need to updata theses arrays so that they get the info from the database so when user exits inquirer it isnt reset to this
 let departments = ['Sales Department', 'Engineer Department', 'Accounting Department', 'Customer Service Department', 'Legal Department'];
 let roles = ['Sales Lead', 'Salesperson', 'Lead Engineer', 'Software Engineer', 'Account Manager', 'Accountant', 'Legal Team Lead', 'Lawyer', 'Customer Service'];
 let managerChoices = ["none"];
